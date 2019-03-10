@@ -97,6 +97,11 @@ if (currentSpeed > 0){
 
 delay(1000);
 
+Serial.print(arrIn[0]);
+Serial.print(arrIn[1]);
+Serial.print(arrIn[2]);
+Serial.print(arrIn[3]);
+Serial.print(arrIn[4]);
 
 //  forward @ full speed
 //  digitalWrite(13, HIGH); //Establishes forward direction of Channel A
