@@ -1,7 +1,7 @@
 ******************************************************************************
                   TI ARM Linker PC v16.9.6                     
 ******************************************************************************
->> Linked Sat Mar 23 14:24:55 2019
+>> Linked Sat Mar 23 17:50:34 2019
 
 OUTPUT FILE NAME:   <combinedPWMSensor.out>
 ENTRY POINT SYMBOL: "_c_int00"  address: 00000d19
@@ -199,8 +199,8 @@ UNDEFED   SHT$$INIT_ARRAY$$Limit
 00000991  SysCtlClockSet                 
 000010a3  SysCtlDelay                    
 00000ef1  SysCtlPeripheralEnable         
-0000064b  SysTick_Init                   
-00000659  SysTick_Wait                   
+00000649  SysTick_Init                   
+00000657  SysTick_Wait                   
 00000685  SysTick_Wait10ms               
 00000397  Timer0IntHandler               
 00000c61  TimerConfigure                 
@@ -283,8 +283,8 @@ address   name
 000005bf  enable_interrupts              
 000005c5  wait_for_interrupts            
 000005e5  PF4_Handler                    
-0000064b  SysTick_Init                   
-00000659  SysTick_Wait                   
+00000649  SysTick_Init                   
+00000657  SysTick_Wait                   
 00000685  SysTick_Wait10ms               
 0000074d  GPIOPadConfigSet               
 0000087f  __mpu_init                     

@@ -1,0 +1,275 @@
+#include "tm4c123gh6pm.h"
+#include <stdint.h>                         // Library of Standard Integer Types
+#include <stdbool.h>                        // Library of Standard Boolean Types
+#include <stdlib.h>                         // Library of Standard Datatype Conversions
+#include "inc/hw_memmap.h"                  // Macros defining the memory map of the Tiva C Series device
+#include "inc/hw_types.h"                   // Defines common types and macros
+#include "inc/hw_timer.h"                   // Defines and macros used when accessing the timer
+#include "inc/hw_gpio.h"                    // Defines Macros for GPIO hardware
+#include "driverlib/debug.h"                // Macros for assisting debug of the driver library
+#include "driverlib/sysctl.h"               // Defines and macros for System Control API of DriverLib
+#include "driverlib/interrupt.h"            // Defines and macros for NVIC Controller API of DriverLib
+#include "driverlib/timer.h"                // Defines and macros for Timer API of driverLib
+#include "driverlib/gpio.h"                 // Defines and macros for GPIO API of DriverLib
+#include "driverlib/pin_map.h"              // Mapping of peripherals to pins for all parts
+#include "driverlib/uart.h"                 // Defines and Macros for the UART
+#include "driverlib/rom.h"                  // Defines and macros for ROM API of driverLib
+
+#define UART0_BAUDRATE  115200              // Macro for UART0 Baud rate
+
+/* -----------------------      Global Variables        --------------------- */
+volatile bool boolTrigCondition = 1;        // Variable to control the Trigger Pin Switching
+volatile uint32_t ui32EchoDuration = 0;     // Variable to store duration for which Echo Pin is high
+volatile uint32_t ui32ObstacleDist = 0;     // Variable to store distance of the Obstacle
+
+uint8_t ui8WelcomeText[] = {"\n\rDistance: "};
+
+/* -----------------------      Function Prototypes     --------------------- */
+void Timer0IntHandler(void);                // The prototype of the ISR for Timer0 Interrupt
+void PortAIntHandler(void);                 // Prototype for ISR of GPIO PortA
+
+//PWM addedd
+void disable_interrupts(void);
+void enable_interrupts(void);
+void wait_for_interrupts(void);
+
+void PWM_Init(void);
+void PF4_Init(void);
+void PF4_Handler(void);
+
+void SysTick_Init(void);
+void SysTick_Wait(unsigned long delay);
+void SysTick_Wait10ms(unsigned long delay);
+
+volatile signed long ComparatorValue = 10000;
+
+int a = 0;
+//PWM added
+/* -----------------------          Main Program        --------------------- */
+int main(void){
+    //for pwm
+    SysTick_Init();
+    PWM_Init();
+    PF4_Init();
+    //for pwm
+
+    // Set the System clock to 80MHz and Enable the clock for peripherals PortA, Timer0, Timer2 and UART0
+    SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN | SYSCTL_XTAL_16MHZ);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER2);
+
+    // Master interrupt enable API for all interrupts
+    IntMasterEnable();
+
+    // Configure PA0 as UART0_Rx and PA1 as UART0_Tx
+    GPIOPinConfigure(GPIO_PA0_U0RX);
+    GPIOPinConfigure(GPIO_PA1_U0TX);
+    GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+    // Configure the baud rate and data setup for the UART0
+    UARTConfigSetExpClk(UART0_BASE, SysCtlClockGet(), UART0_BAUDRATE, UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE );
+    // Enable the UART0
+    UARTEnable(UART0_BASE);
+
+    // Set the PA3 port as Output. Trigger Pin
+    GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_3);
+    // Set the PA2 port as Input with a weak Pull-down. Echo Pin
+    GPIOPinTypeGPIOInput(GPIO_PORTA_BASE, GPIO_PIN_2);
+    GPIOPadConfigSet(GPIO_PORTA_BASE, GPIO_PIN_2, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPD);
+    // Configure and enable the Interrupt on both edges for PA2. Echo Pin
+    IntEnable(INT_GPIOA);
+    GPIOIntTypeSet(GPIO_PORTA_BASE, GPIO_PIN_2, GPIO_BOTH_EDGES);
+    GPIOIntEnable(GPIO_PORTA_BASE, GPIO_INT_PIN_2);
+
+    // Configure Timer0 to run in one-shot down-count mode
+    TimerConfigure(TIMER0_BASE, TIMER_CFG_ONE_SHOT);
+    // Enable the Interrupt specific vector associated with Timer0A
+    IntEnable(INT_TIMER0A);
+    // Enables a specific event within the timer to generate an interrupt
+    TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+
+    // Configure Timer2 to run in one-shot up-count mode
+    TimerConfigure(TIMER2_BASE, TIMER_CFG_ONE_SHOT_UP);
+
+    // Transmit a New Page Character to the Terminal
+    UARTCharPutNonBlocking(UART0_BASE, '\f');
+
+    int test_index;
+    uint8_t iter;
+    for (iter = 0; iter<sizeof(ui8WelcomeText); iter++ ) UARTCharPut(UART0_BASE, ui8WelcomeText[iter]);
+
+    while (1){
+//        if (boolTrigCondition){
+//            // Load the Timer with value for generating a  delay of 10 uS.
+//            TimerLoadSet(TIMER0_BASE, TIMER_A, (SysCtlClockGet() / 100000) -1);
+//            // Make the Trigger Pin (PA3) High
+//            GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, GPIO_PIN_3);
+//            // Enable the Timer0 to cause an interrupt when timeout occurs
+//            TimerEnable(TIMER0_BASE, TIMER_A);
+//            // Disable the condition for Trigger Pin Switching
+//            boolTrigCondition = 0;
+
+//            if ((GPIO_PORTF_DATA_R & 0x10) == 0) {
+                ComparatorValue = 0;
+                PWM1_1_CMPA_R = abs(ComparatorValue - 1); // update comparatorA value
+                PWM1_1_CMPB_R = abs(ComparatorValue - 1); // update comparatorB value
+
+                for (2sec_i = 0; 2sec_i < 1000000000; 2sec_i++){}; //try to make this delay 2 seconds
+                ComparatorValue = 10000;
+                PWM1_1_CMPA_R = abs(ComparatorValue - 1); // update comparatorA value
+                PWM1_1_CMPB_R = abs(ComparatorValue - 1); // update comparatorB value
+//           }
+//        }
+    }
+}
+
+/* -----------------------      Function Definition     --------------------- */
+void Timer0IntHandler(void){
+    // The ISR for Timer0 Interrupt Handling
+    // Clear the timer interrupt
+    TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+    // Disable the timer
+    TimerDisable(TIMER0_BASE, TIMER_A);
+    // Make the Trigger Pin (PA3) Low
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0x00);
+}
+
+void PortAIntHandler(void){
+    // The ISR for GPIO PortA Interrupt Handling
+    // Clear the GPIO Hardware Interrupt
+    GPIOIntClear(GPIO_PORTA_BASE , GPIO_INT_PIN_2);
+
+    // Condition when Echo Pin (PA2) goes high
+    if (GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) == GPIO_PIN_2){
+        // Initialize Timer2 with value 0
+        HWREG(TIMER2_BASE + TIMER_O_TAV) = 0;
+        // Enable Timer2 to start measuring duration for which Echo Pin is High
+        TimerEnable(TIMER2_BASE, TIMER_A);
+    }
+    else{
+        ui32EchoDuration = TimerValueGet(TIMER2_BASE, TIMER_A);
+        // Disable Timer2 to stop measuring duration for which Echo Pin is High
+        TimerDisable(TIMER2_BASE, TIMER_A);
+        // Convert the Timer Duration to Distance Value according to Ultrasonic's formula
+        ui32ObstacleDist = ui32EchoDuration / 4640;
+        // Convert the Distance Value from Integer to Array of Characters
+        char chArrayDistance[8];
+        ltoa(ui32ObstacleDist, chArrayDistance);
+
+        // Transmit the distance reading to the terminal
+        uint8_t iter;
+        for (iter = 0; iter<sizeof(chArrayDistance); iter++ ) UARTCharPut(UART0_BASE, chArrayDistance[iter]);
+        for (iter = 0; iter<sizeof(ui8WelcomeText); iter++ ) UARTCharPut(UART0_BASE, ui8WelcomeText[iter]);
+
+        // Enable condition for Trigger Pulse
+        boolTrigCondition = 1;
+    }
+}
+
+// added for PWM
+/* Initialize PF4 (SW1) */
+void PF4_Init(void) {
+    SYSCTL_RCGC2_R |= 0x00000020;           // activate clock for PortF
+    while ((SYSCTL_PRGPIO_R & 0x00000020) == 0)
+    {};                          // wait until PortF is ready
+    GPIO_PORTF_DIR_R &= ~0x10;              // make PF4 input
+    GPIO_PORTF_AFSEL_R &= ~0x10;            // disable alt function on PF4
+    GPIO_PORTF_DEN_R |= 0x10;               // enable digital I/O on PF4
+    GPIO_PORTF_PCTL_R &= ~0x000F0000;       // use PF4 as GPIO
+    GPIO_PORTF_AMSEL_R &= ~0x10;            // disable analog on PF4
+    GPIO_PORTF_PUR_R = 0x10;                // enable pull-up on PF4
+    GPIO_PORTF_IS_R &= ~0x10;               // PF4 is edge-sensitive
+    GPIO_PORTF_IBE_R &= ~0x10;              // PF4 is not both edges
+    GPIO_PORTF_IEV_R &= ~0x10;              // PF4 falling edge event
+    GPIO_PORTF_ICR_R = 0x10;                // clear flag4
+    GPIO_PORTF_IM_R |= 0x10;                // arm interrupt on PF4
+    NVIC_PRI7_R = (NVIC_PRI7_R&0xFF00FFFF)|0x00A00000; // priority 5
+    NVIC_EN0_R = 0x40000000;                // enable interrupt 30 in NVIC
+    enable_interrupts();                    // Enable global Interrupt flag (I)
+}
+
+void PWM_Init(void) {
+    SYSCTL_RCGCPWM_R |= 0x02;     // 1) enable PWM1 clock
+    SYSCTL_RCGC2_R |= 0x10;          // 2.1) activate clock for PortE
+    while ((SYSCTL_PRGPIO_R & 0x10) == 0) {}; // 2.2) wait until PortE is ready
+    GPIO_PORTE_AFSEL_R |= 0x30;       // 3) enable alt function on PE5-4
+    GPIO_PORTE_PCTL_R &= 0x00FF0000; // 4.1) clear PE5-4 GPIOPCTL PMCx fields
+    GPIO_PORTE_PCTL_R |= 0x00550000; // 4.2) configure PE5-4 as PWM Module 1
+    GPIO_PORTE_AMSEL_R &= ~0x30;     // 4.3) disable analog functionality on PE5-4
+    GPIO_PORTE_DEN_R |= 0x30;        // 4.4) enable digital I/O on PE5-4
+    SYSCTL_RCC_R |= 0x00100000;      // 5.1) configure PWM clock divider as the source for PWM clock
+    SYSCTL_RCC_R &= ~0x000E0000;     // 5.2) clear PWMDIV field
+    SYSCTL_RCC_R |= 0x000060000;     // 5.3) set divisor to 16 so PWM clock source is 1 MHz
+    PWM1_1_CTL_R = 0;                // 6.1) disable PWM while initializing; also configure Count-Down mode
+    PWM1_1_GENA_R = 0x08C;           // 6.2) drives pwmA HIGH when counter matches value in PWM1LOAD
+                                          // drive pwmA LOW when counter matches comparator A
+    PWM1_1_GENB_R = 0x80C;           // 6.3) drives pwmB HIGH when counter matches value in PWM1LOAD
+                                          // drive pwmB LOW when counter matches comparator B
+    PWM1_1_LOAD_R = 10001 -1;        // 7) since target period is 100Hz, there are 10,000 clock ticks per period
+    PWM1_1_CMPA_R = 10000 -1;        // 8) set 0% duty cycle to PE4
+    PWM1_1_CMPB_R = 10000 -1;        // 9) set 0% duty cycle to PE5
+    PWM1_1_CTL_R |= 0x01;            // 10) start the timers in PWM generator 1 by enabling the PWM clock
+    PWM1_ENABLE_R |= 0x0C;           // 11) Enable M1PWM2 and M1PWM3
+}
+
+
+/* Disable interrupts by setting the I bit in the PRIMASK system register */
+void disable_interrupts(void) {
+    __asm("    CPSID  I\n"
+          "    BX     LR");
+}
+
+
+/* Enable interrupts by clearing the I bit in the PRIMASK system register */
+void enable_interrupts(void) {
+    __asm("    CPSIE  I\n"
+          "    BX     LR");
+}
+
+
+/* Enter low-power mode while waiting for interrupts */
+void wait_for_interrupts(void) {
+    __asm("    WFI\n"
+          "    BX     LR");
+}
+
+void PF4_Handler(void) {
+//    disable_interrupts();
+    a=1;
+    GPIO_PORTF_ICR_R = 0x10;      // acknowledge flag4
+    a=2;
+    SysTick_Wait10ms(1);          // debounce the switch: delay 10ms and then recheck the switch status
+    a=3;
+    if ((GPIO_PORTF_DATA_R & 0x10) == 0) {
+        ComparatorValue -= 100;
+        if (ComparatorValue < 0) ComparatorValue = 5500; // reload to 10000 if it's less than 0
+        PWM1_1_CMPA_R = abs(ComparatorValue - 1); // update comparatorA value
+        PWM1_1_CMPB_R = abs(ComparatorValue - 1); // update comparatorB value
+    }
+    a=4;
+//    enable_interrupts();
+}
+
+void SysTick_Init(void){
+  NVIC_ST_CTRL_R = 0;               // disable SysTick during setup
+  NVIC_ST_CTRL_R = 0x00000005;      // enable SysTick with core clock
+}
+
+// The delay parameter is in units of the 16 MHz core clock. (62.5 ns)
+void SysTick_Wait(unsigned long delay){
+  NVIC_ST_RELOAD_R = delay-1;  // number of counts to wait
+  NVIC_ST_CURRENT_R = 0;       // any value written to CURRENT clears
+  while((NVIC_ST_CTRL_R&0x00010000)==0){ // wait for count flag
+  }
+}
+
+// 160000*62.5ns equals 10ms
+void SysTick_Wait10ms(unsigned long delay){
+  unsigned long i;
+  for(i=0; i<delay; i++){
+    SysTick_Wait(160000);  // wait 10ms
+  }
+}
+// added for PWM
+

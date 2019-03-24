@@ -41,7 +41,7 @@ void SysTick_Init(void);
 void SysTick_Wait(unsigned long delay);
 void SysTick_Wait10ms(unsigned long delay);
 
-volatile signed long ComparatorValue = 10000;
+volatile signed long ComparatorValue = 5600;
 
 int a = 0;
 //PWM added
@@ -230,7 +230,7 @@ void PF4_Handler(void) {
     SysTick_Wait10ms(1);          // debounce the switch: delay 10ms and then recheck the switch status
     a=3;
     if ((GPIO_PORTF_DATA_R & 0x10) == 0) {
-        ComparatorValue -= 1000;
+        ComparatorValue -= 100;
         if (ComparatorValue < 0) ComparatorValue = 10000; // reload to 10000 if it's less than 0
         PWM1_1_CMPA_R = abs(ComparatorValue - 1); // update comparatorA value
         PWM1_1_CMPB_R = abs(ComparatorValue - 1); // update comparatorB value
