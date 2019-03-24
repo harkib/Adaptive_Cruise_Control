@@ -2,12 +2,17 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="GPIO" key="selection"/>
+		<item value="PinWrite" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="pinwrite"/>
+			<item value="pinwite"/>
+			<item value="0XFF"/>
+			<item value="Timer0IntHandler"/>
+			<item value="// MM added for stop test - Set the PE2 port as Output. Trigger Pin"/>
 			<item value="gpio"/>
 		</list>
 		<list key="replacehistory">

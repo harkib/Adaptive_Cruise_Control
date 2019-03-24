@@ -76,6 +76,10 @@ int main(void){
     GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_3);
     // Set the PA2 port as Input with a weak Pull-down. Echo Pin
     GPIOPinTypeGPIOInput(GPIO_PORTA_BASE, GPIO_PIN_2);
+
+    // MM added for stop test - Set the PE2 port as Output. Trigger Pin
+    GPIOPinTypeGPIOOutput(GPIO_PORTE_BASE, GPIO_PIN_2);
+
     GPIOPadConfigSet(GPIO_PORTA_BASE, GPIO_PIN_2, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPD);
     // Configure and enable the Interrupt on both edges for PA2. Echo Pin
     IntEnable(INT_GPIOA);
@@ -124,9 +128,11 @@ void Timer0IntHandler(void){
 }
 
 void PortAIntHandler(void){
+    GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_2, 0xFF);
+
     // The ISR for GPIO PortA Interrupt Handling
     // Clear the GPIO Hardware Interrupt
-    GPIOIntClear(GPIO_PORTA_BASE , GPIO_INT_PIN_2);
+    GPIOIntClear(GPIO_PORTA_BASE , GPIO_INT_PIN_2);//
 
     // Condition when Echo Pin (PA2) goes high
     if (GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) == GPIO_PIN_2){
@@ -142,17 +148,20 @@ void PortAIntHandler(void){
         // Convert the Timer Duration to Distance Value according to Ultrasonic's formula
         ui32ObstacleDist = ui32EchoDuration / 4640;
         // Convert the Distance Value from Integer to Array of Characters
-        char chArrayDistance[8];
-        ltoa(ui32ObstacleDist, chArrayDistance);
-
-        // Transmit the distance reading to the terminal
-        uint8_t iter;
-        for (iter = 0; iter<sizeof(chArrayDistance); iter++ ) UARTCharPut(UART0_BASE, chArrayDistance[iter]);
-        for (iter = 0; iter<sizeof(ui8WelcomeText); iter++ ) UARTCharPut(UART0_BASE, ui8WelcomeText[iter]);
+//        char chArrayDistance[8];
+//        ltoa(ui32ObstacleDist, chArrayDistance);
+//
+//        // Transmit the distance reading to the terminal
+//        uint8_t iter;
+//        for (iter = 0; iter<sizeof(chArrayDistance); iter++ ) UARTCharPut(UART0_BASE, chArrayDistance[iter]);
+//        for (iter = 0; iter<sizeof(ui8WelcomeText); iter++ ) UARTCharPut(UART0_BASE, ui8WelcomeText[iter]);
 
         // Enable condition for Trigger Pulse
         boolTrigCondition = 1;
     }
+
+
+    GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_2, 0x00);// to measure interrupt duration
 }
 
 // added for PWM

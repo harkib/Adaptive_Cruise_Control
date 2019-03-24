@@ -2242,3 +2242,51 @@ Unable to communicate with the device. Please check your connection.
 
 !ENTRY org.eclipse.cdt.core 1 0 2019-03-23 17:48:45.137
 !MESSAGE Indexed 'min to max speed' (3 sources, 20 headers) in 1.25 sec: 982 declarations; 5,908 references; 0 unresolved inclusions; 0 syntax errors; 2 unresolved names (0.029%)
+!SESSION 2019-03-23 19:15:49.102 -----------------------------------------------
+eclipse.buildId=4.6.0.I20160606-1100
+java.version=1.8.0_112
+java.vendor=Oracle Corporation
+BootLoader constants: OS=win32, ARCH=x86, WS=win32, NL=en_CA
+Framework arguments:  -product com.ti.ccstudio.branding.product
+Command-line arguments:  -os win32 -ws win32 -arch x86 -product com.ti.ccstudio.branding.product
+
+!ENTRY com.ti.common.core 4 0 2019-03-23 19:16:12.737
+!MESSAGE path=ccs_base/DebugServer
+
+!ENTRY com.ti.common.core 4 0 2019-03-23 19:16:12.738
+!MESSAGE debugServerDir=C:/ti/ccsv7/ccs_base/DebugServer
+
+!ENTRY org.eclipse.cdt.core 1 0 2019-03-23 19:17:01.693
+!MESSAGE Indexed 'combinedPWMSensor_v2' (3 sources, 20 headers) in 1.12 sec: 980 declarations; 5,872 references; 0 unresolved inclusions; 0 syntax errors; 2 unresolved names (0.029%)
+
+!ENTRY com.ti.ccstudio.debug 1 0 2019-03-23 22:27:23.643
+!MESSAGE DS_ERROR: CORTEX_M4_0: Error connecting to the target 
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2019-03-23 22:27:23.832
+!MESSAGE DS_ERROR: Error connecting to the target
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2019-03-23 22:27:28.447
+!MESSAGE DS_ERROR: CORTEX_M4_0: Error connecting to the target 
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2019-03-23 22:27:28.539
+!MESSAGE DS_ERROR: Error connecting to the target
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2019-03-23 22:27:30.083
+!MESSAGE DS_ERROR: CORTEX_M4_0: Error connecting to the target 
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2019-03-23 22:27:30.175
+!MESSAGE DS_ERROR: Error connecting to the target
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2019-03-23 22:27:31.306
+!MESSAGE DS_ERROR: CORTEX_M4_0: Error connecting to the target 
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2019-03-23 22:27:31.398
+!MESSAGE DS_ERROR: Error connecting to the target
+

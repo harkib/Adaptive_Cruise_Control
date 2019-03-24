@@ -986,3 +986,128 @@ gmake[1]: 'min to max speed.out' is up to date.
  
 
 **** Build Finished ****
+
+**** Clean-only build of configuration Debug for project combinedPWMSensor_v2 ****
+
+"C:\\ti\\ccsv7\\utils\\bin\\gmake" -k -j 8 clean -O 
+ 
+DEL /F  "combinedPWMSensor_v2.hex"  "combinedPWMSensor_v2.out" 
+DEL /F "main.obj" "tm4c123gh6pm_startup_ccs.obj" 
+DEL /F "main.d" "tm4c123gh6pm_startup_ccs.d" 
+Could Not Find C:\Users\brent\Desktop\Adaptive_Cruise_Control\combinedPWMSensor_v2\Debug\combinedPWMSensor_v2.hex
+'Finished clean'
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project combinedPWMSensor_v2 ****
+
+"C:\\ti\\ccsv7\\utils\\bin\\gmake" -k -j 8 all -O 
+ 
+'Building file: "../tm4c123gh6pm_startup_ccs.c"'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --include_path="C:/Users/brent/Desktop/Adaptive_Cruise_Control/TIVAWARE/TivaWare_C_Series-2.1.4.178" --include_path="C:/Users/brent/Desktop/Adaptive_Cruise_Control/combinedPWMSensor_v2" --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/include" --define=ccs="ccs" --define=PART_TM4C123GH6PM -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi --preproc_with_compile --preproc_dependency="tm4c123gh6pm_startup_ccs.d_raw"  "../tm4c123gh6pm_startup_ccs.c"
+'Finished building: "../tm4c123gh6pm_startup_ccs.c"'
+ 
+'Building file: "../main.v2.c"'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --include_path="C:/Users/brent/Desktop/Adaptive_Cruise_Control/TIVAWARE/TivaWare_C_Series-2.1.4.178" --include_path="C:/Users/brent/Desktop/Adaptive_Cruise_Control/combinedPWMSensor_v2" --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/include" --define=ccs="ccs" --define=PART_TM4C123GH6PM -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi --preproc_with_compile --preproc_dependency="main.v2.d_raw"  "../main.v2.c"
+'Finished building: "../main.v2.c"'
+ 
+'Building target: "combinedPWMSensor_v2.out"'
+'Invoking: ARM Linker'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C123GH6PM -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"combinedPWMSensor_v2.map" --heap_size=0 --stack_size=512 -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/lib" -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="combinedPWMSensor_v2_linkInfo.xml" --rom_model -o "combinedPWMSensor_v2.out" "./main.v2.obj" "./tm4c123gh6pm_startup_ccs.obj" "../tm4c123gh6pm.cmd"  -l"C:/Users/brent/Desktop/Adaptive_Cruise_Control/TIVAWARE/TivaWare_C_Series-2.1.4.178/driverlib/ccs/Debug/driverlib.lib" -llibc.a 
+<Linking>
+'Finished building target: "combinedPWMSensor_v2.out"'
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project combinedPWMSensor_v2 ****
+
+"C:\\ti\\ccsv7\\utils\\bin\\gmake" -k -j 8 all -O 
+ 
+'Building file: "../main.v2.c"'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --include_path="C:/Users/brent/Desktop/Adaptive_Cruise_Control/TIVAWARE/TivaWare_C_Series-2.1.4.178" --include_path="C:/Users/brent/Desktop/Adaptive_Cruise_Control/combinedPWMSensor_v2" --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/include" --define=ccs="ccs" --define=PART_TM4C123GH6PM -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi --preproc_with_compile --preproc_dependency="main.v2.d_raw"  "../main.v2.c"
+"../main.v2.c", line 177: warning #225-D: function "SetRelSpeed" declared implicitly
+"../main.v2.c", line 178: warning #225-D: function "SetHostSPeed" declared implicitly
+"../main.v2.c", line 179: warning #225-D: function "SetLeadSpead" declared implicitly
+"../main.v2.c", line 180: warning #225-D: function "SetDesiredDidtance" declared implicitly
+'Finished building: "../main.v2.c"'
+ 
+'Building target: "combinedPWMSensor_v2.out"'
+'Invoking: ARM Linker'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C123GH6PM -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"combinedPWMSensor_v2.map" --heap_size=0 --stack_size=512 -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/lib" -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="combinedPWMSensor_v2_linkInfo.xml" --rom_model -o "combinedPWMSensor_v2.out" "./main.v2.obj" "./tm4c123gh6pm_startup_ccs.obj" "../tm4c123gh6pm.cmd"  -l"C:/Users/brent/Desktop/Adaptive_Cruise_Control/TIVAWARE/TivaWare_C_Series-2.1.4.178/driverlib/ccs/Debug/driverlib.lib" -llibc.a 
+<Linking>
+
+ undefined          first referenced
+  symbol                in file     
+ ---------          ----------------
+ SetDesiredDidtance ./main.v2.obj   
+ SetHostSPeed       ./main.v2.obj   
+ SetLeadSpead       ./main.v2.obj   
+ SetRelSpeed        ./main.v2.obj   
+
+error #10234-D: unresolved symbols remain
+error #10010: errors encountered during linking; "combinedPWMSensor_v2.out" not built
+
+>> Compilation failure
+makefile:143: recipe for target 'combinedPWMSensor_v2.out' failed
+gmake[1]: *** [combinedPWMSensor_v2.out] Error 1
+makefile:139: recipe for target 'all' failed
+gmake: *** [all] Error 2
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project combinedPWMSensor ****
+
+"C:\\ti\\ccsv7\\utils\\bin\\gmake" -k -j 8 all -O 
+ 
+'Building file: "../main.c"'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --include_path="C:/Users/brent/Desktop/Adaptive_Cruise_Control/TIVAWARE/TivaWare_C_Series-2.1.4.178" --include_path="C:/Users/brent/Desktop/Adaptive_Cruise_Control/combinedPWMSensor" --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/include" --define=ccs="ccs" --define=PART_TM4C123GH6PM -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi --preproc_with_compile --preproc_dependency="main.d_raw"  "../main.c"
+'Finished building: "../main.c"'
+ 
+'Building target: "combinedPWMSensor.out"'
+'Invoking: ARM Linker'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C123GH6PM -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"combinedPWMSensor.map" --heap_size=0 --stack_size=512 -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/lib" -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="combinedPWMSensor_linkInfo.xml" --rom_model -o "combinedPWMSensor.out" "./main.obj" "./tm4c123gh6pm_startup_ccs.obj" "../tm4c123gh6pm.cmd"  -l"C:/Users/brent/Desktop/Adaptive_Cruise_Control/TIVAWARE/TivaWare_C_Series-2.1.4.178/driverlib/ccs/Debug/driverlib.lib" -llibc.a 
+<Linking>
+'Finished building target: "combinedPWMSensor.out"'
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project combinedPWMSensor ****
+
+"C:\\ti\\ccsv7\\utils\\bin\\gmake" -k -j 8 all -O 
+ 
+gmake[1]: 'combinedPWMSensor.out' is up to date.
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project combinedPWMSensor ****
+
+"C:\\ti\\ccsv7\\utils\\bin\\gmake" -k -j 8 all -O 
+ 
+'Building file: "../main.c"'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --include_path="C:/Users/brent/Desktop/Adaptive_Cruise_Control/TIVAWARE/TivaWare_C_Series-2.1.4.178" --include_path="C:/Users/brent/Desktop/Adaptive_Cruise_Control/combinedPWMSensor" --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/include" --define=ccs="ccs" --define=PART_TM4C123GH6PM -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi --preproc_with_compile --preproc_dependency="main.d_raw"  "../main.c"
+'Finished building: "../main.c"'
+ 
+'Building target: "combinedPWMSensor.out"'
+'Invoking: ARM Linker'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C123GH6PM -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"combinedPWMSensor.map" --heap_size=0 --stack_size=512 -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/lib" -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.6.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="combinedPWMSensor_linkInfo.xml" --rom_model -o "combinedPWMSensor.out" "./main.obj" "./tm4c123gh6pm_startup_ccs.obj" "../tm4c123gh6pm.cmd"  -l"C:/Users/brent/Desktop/Adaptive_Cruise_Control/TIVAWARE/TivaWare_C_Series-2.1.4.178/driverlib/ccs/Debug/driverlib.lib" -llibc.a 
+<Linking>
+'Finished building target: "combinedPWMSensor.out"'
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project combinedPWMSensor ****
+
+"C:\\ti\\ccsv7\\utils\\bin\\gmake" -k -j 8 all -O 
+ 
+gmake[1]: 'combinedPWMSensor.out' is up to date.
+
+**** Build Finished ****
