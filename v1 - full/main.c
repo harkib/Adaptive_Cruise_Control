@@ -15,57 +15,26 @@
 #include "driverlib/uart.h"                 // Defines and Macros for the UART
 #include "driverlib/rom.h"                  // Defines and macros for ROM API of driverLib
 
+void TimerInterupt_Init(void);
 void IOSenosr_Init(void);
 void PWM_Init(void);
 void SysTick_Init(void);
+
 void SysTick_Wait(unsigned long delay);
 void SysTick_Waitmicro(unsigned long delay);
 
 void disable_interrupts(void);
 void enable_interrupts(void);
 void wait_for_interrupts(void);
+void timerInterupt(void);
+
+double getRelDistance(void);
+void setRelVelocity(void);
 
 //Global Variables
 volatile double relDis;
 volatile double relVel;
-
 volatile uint32_t debug;
-
-void setRelVelocity(){
-    int waitTime = 1000; //micro_s
-    double dist1 = getRelDistance();
-    SysTick_Waitmicro(waitTime);  //need to tune a seperate function for this
-    double dist2 = getRelDistance();
-    relDis = (dist1 + dist2)/2;
-    relVel = (dist2 - dist1)/waitTime;
-
-
-}
-
-double getRelDistance(){
-    uint32_t counter = 0;
-    uint32_t maxDis = 100; //cm
-    uint32_t maxCount = 1000000*maxDis*2/34300; // maxDis converted to micro_s, 5.83 ms at 100 cm
-
-    debug = 20;
-    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, GPIO_PIN_3); //write high to trigger
-    debug = 21;
-    SysTick_Waitmicro(10); // wait 10 micro_s
-    debug = 21;
-    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0); //write low to trigger
-    debug = 22;
-
-    while(GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) == 0){} //wait for echo to go high
-    debug = 23;
-    //count while echo is high
-    while(GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) != 0 && counter < maxCount){
-        counter+=10;
-        SysTick_Waitmicro(10);
-    }
-    debug = 24;
-    return (double)(counter*34300)/2000000;
-
-}
 
 int main(){
     debug = 1;
@@ -76,28 +45,22 @@ int main(){
     PWM_Init();
     IOSenosr_Init();
     debug = 4;
-
+    TimerInterupt_Init();
     debug = 5;
 
     while(1){
-        debug = 6;
-        relDis = getRelDistance();
-        debug = 7;
-        SysTick_Waitmicro(2000);
-        // 0 Duty at 10 cm, 100 Duty at 100cm
-        debug = 8;
-        if(relDis < 10){
-            debug = 9;
-            PWM1_1_CMPA_R = 9999;
-            debug = 10;
-        } else {
-            debug = 11;
-            //PWM1_1_CMPA_R = 10000 - 10*relDis;
-            PWM1_1_CMPA_R = 0;
-        }
+        //wait_for_interrupts();
     }
 
     return 0;
+}
+
+void timerInterupt(void){
+    TimerIntClear( TIMER0_BASE, TIMER_TIMA_TIMEOUT );
+    setRelVelocity();
+    debug = 6;
+
+    //relDis = getRelDistance();
 }
 
 void IOSenosr_Init(void){
@@ -154,6 +117,60 @@ void PWM_Init(void) {
     PWM1_1_CTL_R |= 0x01;            // 10) start the timers in PWM generator 1 by enabling the PWM clock
     PWM1_ENABLE_R |= 0x0C;           // 11) Enable M1PWM2 and M1PWM3
 }
+
+void TimerInterupt_Init(void){
+    uint32_t period = SysCtlClockGet()/20;
+    //send clock to peripheral
+    SysCtlPeripheralEnable( SYSCTL_PERIPH_TIMER0 );
+    // Configure Timer0 to run in periodic mode
+    TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC );
+    //set period
+    TimerLoadSet( TIMER0_BASE, TIMER_A, period -1 );
+    // Enable the Interrupt specific vector associated with Timer0A
+    IntEnable(INT_TIMER0A);
+    // Enables a specific event within the timer to generate an interrupt
+    TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+    IntMasterEnable();
+    TimerEnable( TIMER0_BASE, TIMER_A );
+}
+
+double getRelDistance(){
+    uint32_t counter = 0;
+    uint32_t maxDis = 100; //cm
+    uint32_t maxCount = 1000000*maxDis*2/34300; // maxDis converted to micro_s, 5.83 ms at 100 cm
+
+    //debug = 20;
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, GPIO_PIN_3); //write high to trigger
+    //debug = 21;
+    SysTick_Waitmicro(10); // wait 10 micro_s
+    //debug = 22;
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0); //write low to trigger
+
+    //debug = 23;
+    while(GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) == 0){} //wait for echo to go high
+
+    //debug = 24;
+    //count while echo is high
+    while(GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) != 0 && counter < maxCount){
+        counter+=10;
+        SysTick_Waitmicro(10);
+    }
+
+    //debug = 25;
+    return (double)(counter*34300)/2000000;
+
+}
+
+void setRelVelocity(){
+    int waitTime = 2000; //micro_s
+    double dist1 = getRelDistance();
+    SysTick_Waitmicro(waitTime);  //need to tune a separate function for this
+    double dist2 = getRelDistance();
+    relDis = (dist1 + dist2)/2;
+    relVel = (dist2 - dist1)/((double)waitTime/1000000); //cm/s
+}
+
+
 
 /* Disable interrupts by setting the I bit in the PRIMASK system register */
 void disable_interrupts(void) {
