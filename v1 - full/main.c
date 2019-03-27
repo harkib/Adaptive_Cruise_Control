@@ -30,10 +30,16 @@ void timerInterupt(void);
 
 double getRelDistance(void);
 void setRelVelocity(void);
+void setLeadVelocity(void);
+void sethostVelocity(void);
+void setX_des(void);
 
 //Global Variables
 volatile double relDis;
 volatile double relVel;
+volatile double leadVel;
+volatile double hostVel;
+volatile double X_des;
 volatile uint32_t debug;
 
 int main(){
@@ -47,6 +53,7 @@ int main(){
     debug = 4;
     TimerInterupt_Init();
     debug = 5;
+    hostVel = 0;
 
     while(1){
         //wait_for_interrupts();
@@ -58,11 +65,65 @@ int main(){
 void timerInterupt(void){
     TimerIntClear( TIMER0_BASE, TIMER_TIMA_TIMEOUT );
     setRelVelocity();
-    debug = 6;
-
-    //relDis = getRelDistance();
+    setLeadVelocity();
+    setX_des();
 }
 
+void setX_des(void){
+    double alpha = 93.7;//max deceleration cm/s^2
+    X_des = leadVel*leadVel/alpha;
+}
+
+void setLeadVelocity(void){
+    leadVel = hostVel + relVel;
+}
+
+
+void sethostVelocity(void){
+
+}
+
+
+double getRelDistance(){
+    uint32_t counter = 0;
+    uint32_t maxDis = 100; //cm
+    uint32_t maxCount = 1000000*maxDis*2/34300; // maxDis converted to micro_s, 5.83 ms at 100 cm
+
+    //debug = 20;
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, GPIO_PIN_3); //write high to trigger
+    //debug = 21;
+    SysTick_Waitmicro(10); // wait 10 micro_s
+    //debug = 22;
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0); //write low to trigger
+
+    //debug = 23;
+    while(GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) == 0){} //wait for echo to go high
+
+    //debug = 24;
+    //count while echo is high
+    while(GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) != 0 && counter < maxCount){
+        counter+=10;
+        SysTick_Waitmicro(10);
+    }
+
+    //debug = 25;
+    return (double)(counter*34300)/2000000;
+
+}
+
+void setRelVelocity(){
+    int waitTime = 2000; //micro_s
+    double dist1 = getRelDistance();
+    SysTick_Waitmicro(waitTime);  //need to tune a separate function for this
+    double dist2 = getRelDistance();
+    relDis = (dist1 + dist2)/2;
+
+    if(dist2 > 99){
+        relVel = 100; //cm/s
+    } else {
+        relVel = (dist2 - dist1)/((double)waitTime/1000000); //cm/s
+    }
+}
 void IOSenosr_Init(void){
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
     // Set the PA3 port as Output. Trigger Pi
@@ -75,22 +136,6 @@ void IOSenosr_Init(void){
 void SysTick_Init(void){
   NVIC_ST_CTRL_R = 0;               // disable SysTick during setup
   NVIC_ST_CTRL_R = 0x00000005;      // enable SysTick with core clock
-}
-
-// The delay parameter is in units of the 16 MHz core clock. (62.5 ns)
-void SysTick_Wait(unsigned long delay){
-  NVIC_ST_RELOAD_R = delay-1;  // number of counts to wait
-  NVIC_ST_CURRENT_R = 0;       // any value written to CURRENT clears
-  while((NVIC_ST_CTRL_R&0x00010000)==0){ // wait for count flag
-  }
-}
-
-
-void SysTick_Waitmicro(unsigned long delay){
-  unsigned long i;
-  for(i=0; i<delay; i++){
-    SysTick_Wait(25);
-  }
 }
 
 //initialize PWM
@@ -134,42 +179,21 @@ void TimerInterupt_Init(void){
     TimerEnable( TIMER0_BASE, TIMER_A );
 }
 
-double getRelDistance(){
-    uint32_t counter = 0;
-    uint32_t maxDis = 100; //cm
-    uint32_t maxCount = 1000000*maxDis*2/34300; // maxDis converted to micro_s, 5.83 ms at 100 cm
-
-    //debug = 20;
-    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, GPIO_PIN_3); //write high to trigger
-    //debug = 21;
-    SysTick_Waitmicro(10); // wait 10 micro_s
-    //debug = 22;
-    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0); //write low to trigger
-
-    //debug = 23;
-    while(GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) == 0){} //wait for echo to go high
-
-    //debug = 24;
-    //count while echo is high
-    while(GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) != 0 && counter < maxCount){
-        counter+=10;
-        SysTick_Waitmicro(10);
-    }
-
-    //debug = 25;
-    return (double)(counter*34300)/2000000;
-
+// The delay parameter is in units of the 16 MHz core clock. (62.5 ns)
+void SysTick_Wait(unsigned long delay){
+  NVIC_ST_RELOAD_R = delay-1;  // number of counts to wait
+  NVIC_ST_CURRENT_R = 0;       // any value written to CURRENT clears
+  while((NVIC_ST_CTRL_R&0x00010000)==0){ // wait for count flag
+  }
 }
 
-void setRelVelocity(){
-    int waitTime = 2000; //micro_s
-    double dist1 = getRelDistance();
-    SysTick_Waitmicro(waitTime);  //need to tune a separate function for this
-    double dist2 = getRelDistance();
-    relDis = (dist1 + dist2)/2;
-    relVel = (dist2 - dist1)/((double)waitTime/1000000); //cm/s
-}
 
+void SysTick_Waitmicro(unsigned long delay){
+  unsigned long i;
+  for(i=0; i<delay; i++){
+    SysTick_Wait(25);
+  }
+}
 
 
 /* Disable interrupts by setting the I bit in the PRIMASK system register */
