@@ -1,7 +1,6 @@
 # FIXED
 
 main.v2.obj: ../main.v2.c
-main.v2.obj: ../tm4c123gh6pm.h
 main.v2.obj: C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/stdint.h
 main.v2.obj: C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/_stdint40.h
 main.v2.obj: C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/sys/stdint.h
@@ -14,6 +13,7 @@ main.v2.obj: C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/stdb
 main.v2.obj: C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/stdlib.h
 main.v2.obj: C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/_ti_config.h
 main.v2.obj: C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/linkage.h
+main.v2.obj: ../tm4c123gh6pm.h
 main.v2.obj: C:/Users/harki/Desktop/TIVAWARE/TivaWare_C_Series-2.1.4.178/inc/hw_memmap.h
 main.v2.obj: C:/Users/harki/Desktop/TIVAWARE/TivaWare_C_Series-2.1.4.178/inc/hw_types.h
 main.v2.obj: C:/Users/harki/Desktop/TIVAWARE/TivaWare_C_Series-2.1.4.178/inc/hw_timer.h
@@ -28,7 +28,6 @@ main.v2.obj: C:/Users/harki/Desktop/TIVAWARE/TivaWare_C_Series-2.1.4.178/driverl
 main.v2.obj: C:/Users/harki/Desktop/TIVAWARE/TivaWare_C_Series-2.1.4.178/driverlib/rom.h
 
 ../main.v2.c: 
-../tm4c123gh6pm.h: 
 C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/stdint.h: 
 C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/_stdint40.h: 
 C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/sys/stdint.h: 
@@ -41,6 +40,7 @@ C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/stdbool.h:
 C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/stdlib.h: 
 C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/_ti_config.h: 
 C:/ti/ccs900/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/linkage.h: 
+../tm4c123gh6pm.h: 
 C:/Users/harki/Desktop/TIVAWARE/TivaWare_C_Series-2.1.4.178/inc/hw_memmap.h: 
 C:/Users/harki/Desktop/TIVAWARE/TivaWare_C_Series-2.1.4.178/inc/hw_types.h: 
 C:/Users/harki/Desktop/TIVAWARE/TivaWare_C_Series-2.1.4.178/inc/hw_timer.h: 
