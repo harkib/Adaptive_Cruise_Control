@@ -18,6 +18,7 @@
 void TimerInterupt_Init(void);
 void IOSenosr_Init(void);
 void PWM_Init(void);
+void PF4_Init(void);
 void SysTick_Init(void);
 
 void SysTick_Wait(unsigned long delay);
@@ -27,12 +28,16 @@ void disable_interrupts(void);
 void enable_interrupts(void);
 void wait_for_interrupts(void);
 void timerInterupt(void);
+void buttonInterrtupt(void);
 
 double getRelDistance(void);
 void setRelVelocity(void);
 void setLeadVelocity(void);
-void sethostVelocity(void);
 void setX_des(void);
+void setX_pid(void);
+void XtoVelocity(void);
+void VtoVoltage(void);
+
 
 //Global Variables
 volatile double relDis;
@@ -40,23 +45,35 @@ volatile double relVel;
 volatile double leadVel;
 volatile double hostVel;
 volatile double X_des;
+volatile double X_pid;
+volatile double duty;
+volatile int freq = 1; // deltaT = 1/freq
 volatile uint32_t debug;
 
 int main(){
-    debug = 1;
     SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN | SYSCTL_XTAL_16MHZ);
-    debug = 2;
+    debug = 1;
     SysTick_Init();
-    debug = 3;
+    debug =2;
+    PF4_Init();
+    debug = -1;
     PWM_Init();
+    debug = 2;
     IOSenosr_Init();
     debug = 4;
     TimerInterupt_Init();
     debug = 5;
+
+    debug = 6;
     hostVel = 0;
+    enable_interrupts();
+    debug = 7;
+    GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_7);
 
     while(1){
-        //wait_for_interrupts();
+        debug = 88;
+        GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, 0);
+        wait_for_interrupts();
     }
 
     return 0;
@@ -64,14 +81,49 @@ int main(){
 
 void timerInterupt(void){
     TimerIntClear( TIMER0_BASE, TIMER_TIMA_TIMEOUT );
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, GPIO_PIN_7);
     setRelVelocity();
     setLeadVelocity();
     setX_des();
+    setX_pid();
+    XtoVelocity();
+    VtoVoltage();
+}
+
+void VtoVoltage(void){
+
+
+    if(hostVel < 75){
+        duty = .0249*hostVel*hostVel - 1.4834*hostVel + 64.824;
+    } else {
+        duty = 100;
+    }
+
+    if (duty < 0){ duty = 0; }
+
+    //PWM1_1_CMPA_R = 10000 - 100*duty;
+
+}
+
+void XtoVelocity(void){
+    double t = (double)1/freq;
+    hostVel = (double)(2/t)*(leadVel*t + relDis - X_des) - hostVel;
+    if (hostVel > 75){
+        hostVel = 75;
+    }
+}
+
+void setX_pid(void){
+    X_pid = X_des - relDis;
 }
 
 void setX_des(void){
     double alpha = 93.7;//max deceleration cm/s^2
+
     X_des = leadVel*leadVel/alpha;
+    if (X_des < 5 ){
+        X_des = 5;
+    }
 }
 
 void setLeadVelocity(void){
@@ -79,16 +131,12 @@ void setLeadVelocity(void){
 }
 
 
-void sethostVelocity(void){
-
-}
-
 
 double getRelDistance(){
     uint32_t counter = 0;
     uint32_t maxDis = 100; //cm
     uint32_t maxCount = 1000000*maxDis*2/34300; // maxDis converted to micro_s, 5.83 ms at 100 cm
-
+    //debug = 777;
     //debug = 20;
     GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, GPIO_PIN_3); //write high to trigger
     //debug = 21;
@@ -124,6 +172,7 @@ void setRelVelocity(){
         relVel = (dist2 - dist1)/((double)waitTime/1000000); //cm/s
     }
 }
+
 void IOSenosr_Init(void){
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
     // Set the PA3 port as Output. Trigger Pi
@@ -163,20 +212,48 @@ void PWM_Init(void) {
     PWM1_ENABLE_R |= 0x0C;           // 11) Enable M1PWM2 and M1PWM3
 }
 
+/* Initialize PF4 (SW1) */
+void PF4_Init(void) {
+    SYSCTL_RCGC2_R |= 0x00000020;           // activate clock for PortF
+    while ((SYSCTL_PRGPIO_R & 0x00000020) == 0)
+    {};                          // wait until PortF is ready
+    GPIO_PORTF_DIR_R &= ~0x10;              // make PF4 input
+    GPIO_PORTF_AFSEL_R &= ~0x10;            // disable alt function on PF4
+    GPIO_PORTF_DEN_R |= 0x10;               // enable digital I/O on PF4
+    GPIO_PORTF_PCTL_R &= ~0x000F0000;       // use PF4 as GPIO
+    GPIO_PORTF_AMSEL_R &= ~0x10;            // disable analog on PF4
+    GPIO_PORTF_PUR_R = 0x10;                // enable pull-up on PF4
+    GPIO_PORTF_IS_R &= ~0x10;               // PF4 is edge-sensitive
+    GPIO_PORTF_IBE_R &= ~0x10;              // PF4 is not both edges
+    GPIO_PORTF_IEV_R &= ~0x10;              // PF4 falling edge event
+    GPIO_PORTF_ICR_R = 0x10;                // clear flag4
+    GPIO_PORTF_IM_R |= 0x10;                // arm interrupt on PF4
+    NVIC_PRI7_R = (NVIC_PRI7_R&0xFF00FFFF)|0x00A00000; // priority 5
+    NVIC_EN0_R = 0x40000000;                // enable interrupt 30 in NVIC
+    //enable_interrupts();
+}
+
 void TimerInterupt_Init(void){
-    uint32_t period = SysCtlClockGet()/20;
+    uint32_t ticks = SysCtlClockGet()/freq;
     //send clock to peripheral
     SysCtlPeripheralEnable( SYSCTL_PERIPH_TIMER0 );
     // Configure Timer0 to run in periodic mode
     TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC );
     //set period
-    TimerLoadSet( TIMER0_BASE, TIMER_A, period -1 );
+    TimerLoadSet( TIMER0_BASE, TIMER_A, ticks -1 );
     // Enable the Interrupt specific vector associated with Timer0A
     IntEnable(INT_TIMER0A);
     // Enables a specific event within the timer to generate an interrupt
     TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
     IntMasterEnable();
     TimerEnable( TIMER0_BASE, TIMER_A );
+}
+
+void buttonInterrtupt(void){
+    disable_interrupts();
+    PWM1_1_CMPA_R = 9999;
+    debug = 999;
+    while (1){}
 }
 
 // The delay parameter is in units of the 16 MHz core clock. (62.5 ns)
