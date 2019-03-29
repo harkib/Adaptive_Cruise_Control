@@ -47,7 +47,7 @@ volatile double hostVel;
 volatile double X_des;
 volatile double X_pid;
 volatile double duty;
-volatile int freq = 1; // deltaT = 1/freq
+volatile int freq = 8; // deltaT = 1/freq
 volatile uint32_t debug;
 
 int main(){
@@ -67,12 +67,16 @@ int main(){
     debug = 6;
     hostVel = 0;
     enable_interrupts();
+    //disable_interrupts();
     debug = 7;
     GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_7);
 
     while(1){
         debug = 88;
-        GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, 0);
+//        GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, GPIO_PIN_7);
+//        SysTick_Waitmicro(105000);
+//        GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, 0);
+//        SysTick_Waitmicro(105000);
         wait_for_interrupts();
     }
 
@@ -81,7 +85,6 @@ int main(){
 
 void timerInterupt(void){
     TimerIntClear( TIMER0_BASE, TIMER_TIMA_TIMEOUT );
-    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, GPIO_PIN_7);
     setRelVelocity();
     setLeadVelocity();
     setX_des();
@@ -160,14 +163,14 @@ double getRelDistance(){
 }
 
 void setRelVelocity(){
-    int waitTime = 2000; //micro_s
+    int waitTime = 100000; //micro_s
     double dist1 = getRelDistance();
-    SysTick_Waitmicro(waitTime);  //need to tune a separate function for this
+    SysTick_Waitmicro(waitTime);
     double dist2 = getRelDistance();
     relDis = (dist1 + dist2)/2;
 
     if(dist2 > 99){
-        relVel = 100; //cm/s
+        relVel = 75; //cm/s, -> repsent imaginary car at max distance
     } else {
         relVel = (dist2 - dist1)/((double)waitTime/1000000); //cm/s
     }
@@ -266,6 +269,7 @@ void SysTick_Wait(unsigned long delay){
 
 
 void SysTick_Waitmicro(unsigned long delay){
+  delay = (delay-10)*(1.05) + 10;
   unsigned long i;
   for(i=0; i<delay; i++){
     SysTick_Wait(25);
