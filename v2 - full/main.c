@@ -38,6 +38,7 @@ void setX_pid(void);
 void XtoVelocity(void);
 void VtoVoltage(void);
 void PID (void);
+void Break (void);
 
 
 //Global Variables
@@ -48,7 +49,7 @@ volatile double hostVel;
 volatile double X_des;
 volatile double X_pid;
 volatile double duty;
-volatile int freq = 8; // deltaT = 1/freq
+volatile int freq = 50; // deltaT = 1/freq
 volatile uint32_t debug;
 
 int main(){
@@ -70,7 +71,7 @@ int main(){
     enable_interrupts();
     //disable_interrupts();
     debug = 7;
-    GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_7);
+
 
     while(1){
         debug = 88;
@@ -94,12 +95,23 @@ void timerInterupt(void){
 //    setX_des();
 //    setX_pid();
 //    XtoVelocity();
+   Break();
     VtoVoltage();
 }
+
+void Break (void){
+    if(relDis < 5){
+        GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, GPIO_PIN_7);
+    } else {
+        GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, 0);
+    }
+}
+
+
 void PID (void){
     double goal = 15;
     double error = relDis - 15;
-    double P = 3;
+    double P = 2.5;
     hostVel = error*P;
     if(hostVel < 0){
         hostVel = 0;
@@ -108,9 +120,12 @@ void PID (void){
 
 void VtoVoltage(void){
 
-
+    if(hostVel > 65){
+        hostVel = 65;
+    }
     if(hostVel < 25 ){
-        duty = 0;
+      duty = 0;
+        //  duty = 1.6*hostVel;
     } else if(hostVel < 75){
         duty = .0249*hostVel*hostVel - 1.4834*hostVel + 64.824;
     } else  {
@@ -206,6 +221,8 @@ void IOSenosr_Init(void){
     // Set the PA2 port as Input with a weak Pull-down. Echo Pin
     GPIOPinTypeGPIOInput(GPIO_PORTA_BASE, GPIO_PIN_2);
     GPIOPadConfigSet(GPIO_PORTA_BASE, GPIO_PIN_2, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPD);
+    //for break
+    GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_7);
 }
 
 void SysTick_Init(void){
