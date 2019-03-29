@@ -96,15 +96,16 @@ void timerInterupt(void){
 void VtoVoltage(void){
 
 
-    if(hostVel < 75){
+    if(hostVel < 25 ){
+      duty = 0;
+        //  duty = 1.6*hostVel;
+    } else if(hostVel < 75){
         duty = .0249*hostVel*hostVel - 1.4834*hostVel + 64.824;
-    } else {
+    } else  {
         duty = 100;
     }
 
-    if (duty < 0){ duty = 0; }
-
-    //PWM1_1_CMPA_R = 10000 - 100*duty;
+    PWM1_1_CMPA_R = 10000 - 100*duty;
 
 }
 
