@@ -56,7 +56,7 @@ dt = .000001; %time step in sim
 t = 0:dt:totalTime;
 u = zeros(length(t),1);
 for j = 1:length(t)
-    if (t(j) > 6.3 && t(j) < 7.3)
+    if (t(j) > 6.3 && t(j) < 6.4)
             u(j) = a_mag;
     end
 end

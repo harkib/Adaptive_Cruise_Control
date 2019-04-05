@@ -95,7 +95,7 @@ void timerInterupt(void){
 //    setX_des();
 //    setX_pid();
 //    XtoVelocity();
-   Break();
+    Break();
     VtoVoltage();
 }
 
@@ -187,28 +187,22 @@ void setRelVelocity(){
 
 
 double getRelDistance(){
+	
     uint32_t counter = 0;
     uint32_t maxDis = 100; //cm
     uint32_t maxCount = 1000000*maxDis*2/34300; // maxDis converted to micro_s, 5.83 ms at 100 cm
-    //debug = 777;
-    //debug = 20;
+
     GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, GPIO_PIN_3); //write high to trigger
-    //debug = 21;
     SysTick_Waitmicro(10); // wait 10 micro_s
-    //debug = 22;
     GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0); //write low to trigger
 
-    //debug = 23;
-    while(GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) == 0){} //wait for echo to go high
-
-    //debug = 24;
+    while(GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) == 0){} //wait for echo to go 
     //count while echo is high
     while(GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_2) != 0 && counter < maxCount){
         counter+=10;
         SysTick_Waitmicro(10);
     }
 
-    //debug = 25;
     return (double)(counter*34300)/2000000;
 
 }
@@ -273,7 +267,6 @@ void PF4_Init(void) {
     GPIO_PORTF_IM_R |= 0x10;                // arm interrupt on PF4
     NVIC_PRI7_R = (NVIC_PRI7_R&0xFF00FFFF)|0x00A00000; // priority 5
     NVIC_EN0_R = 0x40000000;                // enable interrupt 30 in NVIC
-    //enable_interrupts();
 }
 
 void TimerInterupt_Init(void){
@@ -295,7 +288,6 @@ void TimerInterupt_Init(void){
 void buttonInterrtupt(void){
     disable_interrupts();
     PWM1_1_CMPA_R = 9999;
-    debug = 999;
     while (1){}
 }
 
